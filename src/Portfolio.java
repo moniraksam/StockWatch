@@ -50,6 +50,8 @@ public class Portfolio {
     // Get-type methods
 
     public double getTotalAmountInvested() {
+        if(portforlioIsEmpty()) return 0.0;
+
         double total = 0.0;
 
         for (Stock stock : stocks) {
@@ -60,6 +62,7 @@ public class Portfolio {
     }
 
     public double getCurrentMarketValue() {
+        if(portforlioIsEmpty()) return 0.0;
         double total = 0.0;
 
         for (Stock stock : stocks) {
@@ -70,6 +73,7 @@ public class Portfolio {
     }
 
     public double getProfitLoss() {
+        if(portforlioIsEmpty()) return 0.0;
         return getCurrentMarketValue() - getTotalAmountInvested();
     }
 
@@ -130,5 +134,13 @@ public class Portfolio {
             }
         }
         return false;
+    }
+
+    public boolean portforlioIsEmpty() {
+        if (this.stocks.size() == 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
