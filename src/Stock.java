@@ -1,4 +1,5 @@
 package src;
+
 public class Stock {
     private String ticker;
     private double purchasePrice;
@@ -8,6 +9,24 @@ public class Stock {
     // Constructor
     public Stock(String ticker, double purchasePrice, double currentPrice,
             int quantity) {
+        if (ticker == null || ticker.isEmpty() || ticker.isBlank()) {
+            throw new IllegalArgumentException("Ticker cannot be empty");
+        } else if (ticker.length() != 4) {
+            throw new IllegalArgumentException("Ticker must be of length 4.");
+        }
+
+        if (purchasePrice <= 0) {
+            throw new IllegalArgumentException("Purchase price must be greater than zero");
+        }
+
+        if (currentPrice < 0) {
+            throw new IllegalArgumentException("Current price cannot be negative");
+        }
+
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than zero.");
+        }
+
         this.ticker = ticker;
         this.purchasePrice = purchasePrice;
         this.currentPrice = currentPrice;
