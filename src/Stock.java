@@ -10,7 +10,7 @@ public class Stock {
     public Stock(String ticker, double purchasePrice, double currentPrice,
             int quantity) {
         if (ticker == null || ticker.isEmpty() || ticker.isBlank()) {
-            throw new IllegalArgumentException("Ticker cannot be empty");
+            throw new IllegalArgumentException("Ticker cannot be null, empty or blank.");
         } else if (ticker.length() != 4) {
             throw new IllegalArgumentException("Ticker must be of length 4.");
         }
@@ -55,6 +55,36 @@ public class Stock {
         return this.quantity;
     }
 
+    // Generic Setters
+    public void setTicker(String newTicker) {
+        tickerVerification(newTicker);
+        String oldTicker = this.getTicker();
+        this.ticker = newTicker;
+        System.out.println(oldTicker + " has been set to " + newTicker);
+    }
+
+    public void setCurrentPrice(Double newCurrentPrice) {
+        if (newCurrentPrice < 0) {
+            throw new IllegalArgumentException("New price cannot be inferior to 0.");
+        }
+    }
+
+    public void setQuantity(Double newQuantity) {
+        if (newQuantity < 0) {
+            throw new IllegalArgumentException("New quantity cannot be inferior to 0.");
+        }
+    }
+
+    // Helper methods
+    public void tickerVerification(String ticker) {
+        if (ticker == null || ticker.isEmpty() || ticker.isBlank()) {
+            throw new IllegalArgumentException("Ticker cannot be null, empty or blank.");
+        } else if (ticker.length() != 4) {
+            throw new IllegalArgumentException("Ticker must be of length 4.");
+        }
+        // If all good then no exceptions thrown.
+    }
+
     // Overrides
     @Override
     public String toString() {
@@ -62,4 +92,5 @@ public class Stock {
                 + "\nCurrent Price : " + this.currentPrice + "\nQuantity : " + this.quantity + "\nProfit Loss : "
                 + getProfitLoss() + "\n";
     }
+
 }
