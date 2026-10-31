@@ -67,6 +67,7 @@ public class Stock {
         if (newCurrentPrice < 0) {
             throw new IllegalArgumentException("New price cannot be inferior to 0.");
         }
+        this.currentPrice = newCurrentPrice;
     }
 
     public void setQuantity(Double newQuantity) {
