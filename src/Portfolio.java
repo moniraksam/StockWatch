@@ -31,6 +31,24 @@ public class Portfolio {
         System.out.println(stock.getTicker() + " has been added to the portforlio.");
     }
 
+    public void updateStockPrice(String ticker, double newPrice) {
+        tickerVerification(ticker);
+
+        if (tickerInPortforlio(ticker) == false) {
+            throw new IllegalArgumentException("Ticker must be in the portforlio.");
+        }
+
+        for (Stock s : stocks) {
+            if (s.getTicker().equals(ticker)) {
+                s.setCurrentPrice(newPrice);
+                System.out.println("New price set to " + s.getTicker() + ".");
+            }
+        }
+
+    }
+
+    // Get-type methods
+
     public double getTotalAmountInvested() {
         double total = 0.0;
 
@@ -73,6 +91,8 @@ public class Portfolio {
         return getProfitLoss() / getTotalAmountInvested() * 100;
     }
 
+    // Display methods
+
     public void displayPortfolio() {
         for (Stock stock : stocks) {
             System.out.println(stock);
@@ -90,5 +110,25 @@ public class Portfolio {
         System.out.println("Porforlio Return in % : "
                 + getPortfolioPercentReturn());
         System.out.println();
+    }
+
+    // Helper methods
+    public void tickerVerification(String ticker) {
+        if (ticker == null || ticker.isEmpty() || ticker.isBlank()) {
+            throw new IllegalArgumentException("Ticker cannot be null, empty or blank.");
+        } else if (ticker.length() != 4) {
+            throw new IllegalArgumentException("Ticker must be of length 4.");
+        }
+        // If all good then no exceptions thrown.
+    }
+
+    public boolean tickerInPortforlio(String tickerToSearch) {
+        tickerVerification(tickerToSearch);
+        for (Stock s : stocks) {
+            if (s.getTicker().equals(tickerToSearch)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
