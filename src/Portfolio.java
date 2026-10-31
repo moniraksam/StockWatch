@@ -1,4 +1,5 @@
 package src;
+
 import java.util.ArrayList;
 
 public class Portfolio {
@@ -11,9 +12,23 @@ public class Portfolio {
 
     // Methods
     public void addStock(Stock stock) {
-        if (stock != null) {
-            stocks.add(stock);
+        if (stock == null) {
+            throw new IllegalArgumentException("Cannot add a null stock.");
         }
+
+        for (Stock s : this.stocks) {
+            if (stock.getTicker().equals(s.getTicker())) {
+                throw new IllegalArgumentException(stock.getTicker() + " already exists in the portforlio.");
+            }
+        }
+
+        try {
+            stocks.add(stock);
+        } catch (Exception e) {
+            System.out.println("Something went wrong adding " + stock.getTicker() + ". Error :  " + e.getMessage());
+        }
+
+        System.out.println(stock.getTicker() + " has been added to the portforlio.");
     }
 
     public double getTotalAmountInvested() {
