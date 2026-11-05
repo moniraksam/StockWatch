@@ -57,27 +57,26 @@ public class Stock {
 
     // Generic Setters
     public void setTicker(String newTicker) {
-        tickerVerification(newTicker);
-        String oldTicker = this.getTicker();
+        validateTicker(newTicker);
         this.ticker = newTicker;
-        System.out.println(oldTicker + " has been set to " + newTicker);
     }
 
-    public void setCurrentPrice(Double newCurrentPrice) {
+    public void setCurrentPrice(double newCurrentPrice) {
         if (newCurrentPrice < 0) {
             throw new IllegalArgumentException("New price cannot be inferior to 0.");
         }
         this.currentPrice = newCurrentPrice;
     }
 
-    public void setQuantity(Double newQuantity) {
-        if (newQuantity < 0) {
+    public void setQuantity(int newQuantity) {
+        if (newQuantity <= 0) {
             throw new IllegalArgumentException("New quantity cannot be inferior to 0.");
         }
+        this.quantity = newQuantity;
     }
 
     // Helper methods
-    public void tickerVerification(String ticker) {
+    public void validateTicker(String ticker) {
         if (ticker == null || ticker.isEmpty() || ticker.isBlank()) {
             throw new IllegalArgumentException("Ticker cannot be null, empty or blank.");
         } else if (ticker.length() != 4) {

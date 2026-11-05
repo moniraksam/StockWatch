@@ -1,9 +1,11 @@
 package src;
 
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.ArrayList;
 
 public class Portfolio {
-    private ArrayList<Stock> stocks;
+    private final List<Stock> stocks;
 
     // Constructor
     public Portfolio() {
@@ -18,39 +20,34 @@ public class Portfolio {
 
         for (Stock s : this.stocks) {
             if (stock.getTicker().equals(s.getTicker())) {
-                throw new IllegalArgumentException(stock.getTicker() + " already exists in the portforlio.");
+                throw new IllegalArgumentException(stock.getTicker() + " already exists in the portfolio.");
             }
         }
-
-        try {
-            stocks.add(stock);
-        } catch (Exception e) {
-            System.out.println("Something went wrong adding " + stock.getTicker() + ". Error :  " + e.getMessage());
-        }
-
-        System.out.println(stock.getTicker() + " has been added to the portforlio.");
+        stocks.add(stock);
     }
 
     public void updateStockPrice(String ticker, double newPrice) {
-        tickerVerification(ticker);
-
-        if (tickerInPortforlio(ticker) == false) {
-            throw new IllegalArgumentException("Ticker must be in the portforlio.");
-        }
-
+        validateTicker(ticker);
+        if (newPrice < 0)
+            throw new IllegalArgumentException("New price cannot be negative.");
         for (Stock s : stocks) {
             if (s.getTicker().equals(ticker)) {
                 s.setCurrentPrice(newPrice);
-                System.out.println("New price set to " + s.getTicker() + ".");
+                return;
             }
+
         }
+
+        // If execution reaches here, no matching ticker was found.
+        throw new NoSuchElementException("No matching ticker found in the portfolio");
 
     }
 
     // Get-type methods
 
     public double getTotalAmountInvested() {
-        if(portforlioIsEmpty()) return 0.0;
+        if (isPortfolioEmpty())
+            return 0.0;
 
         double total = 0.0;
 
@@ -62,7 +59,8 @@ public class Portfolio {
     }
 
     public double getCurrentMarketValue() {
-        if(portforlioIsEmpty()) return 0.0;
+        if (isPortfolioEmpty())
+            return 0.0;
         double total = 0.0;
 
         for (Stock stock : stocks) {
@@ -73,7 +71,8 @@ public class Portfolio {
     }
 
     public double getProfitLoss() {
-        if(portforlioIsEmpty()) return 0.0;
+        if (isPortfolioEmpty())
+            return 0.0;
         return getCurrentMarketValue() - getTotalAmountInvested();
     }
 
@@ -92,6 +91,10 @@ public class Portfolio {
     }
 
     public double getPortfolioPercentReturn() {
+        if (getTotalAmountInvested() == 0) {
+            throw new IllegalStateException("Cannot calculate return on an empty investment.");
+        }
+
         return getProfitLoss() / getTotalAmountInvested() * 100;
     }
 
@@ -117,7 +120,7 @@ public class Portfolio {
     }
 
     // Helper methods
-    public void tickerVerification(String ticker) {
+    public void validateTicker(String ticker) {
         if (ticker == null || ticker.isEmpty() || ticker.isBlank()) {
             throw new IllegalArgumentException("Ticker cannot be null, empty or blank.");
         } else if (ticker.length() != 4) {
@@ -126,8 +129,8 @@ public class Portfolio {
         // If all good then no exceptions thrown.
     }
 
-    public boolean tickerInPortforlio(String tickerToSearch) {
-        tickerVerification(tickerToSearch);
+    public boolean containsTicker(String tickerToSearch) {
+        validateTicker(tickerToSearch);
         for (Stock s : stocks) {
             if (s.getTicker().equals(tickerToSearch)) {
                 return true;
@@ -136,8 +139,8 @@ public class Portfolio {
         return false;
     }
 
-    public boolean portforlioIsEmpty() {
-        if (this.stocks.size() == 0) {
+    public boolean isPortfolioEmpty() {
+        if (this.stocks.isEmpty()) {
             return true;
         } else {
             return false;
