@@ -28,7 +28,7 @@ public class Portfolio {
     public void updateStockPrice(String ticker, double newPrice) {
         validateTicker(ticker);
 
-        if (!Double.isFinite(newPrice))
+        if (!Double.isFinite(newPrice) || newPrice < 0)
             throw new IllegalArgumentException("New price cannot be negative.");
 
         for (Stock s : stocks) {
@@ -102,6 +102,7 @@ public class Portfolio {
     public void displayPortfolio() {
         if (isPortfolioEmpty()){
             System.out.println("Portforlio is empty.");
+            return;
         }
 
         for (Stock stock : stocks) {

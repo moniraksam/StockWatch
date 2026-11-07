@@ -11,11 +11,11 @@ public class Stock {
             int quantity) {
         validateTicker(ticker);
 
-        if (!Double.isFinite(purchasePrice)) {
-            throw new IllegalArgumentException("Purchase price must be greater than zero.");
+        if (!Double.isFinite(purchasePrice) || purchasePrice <= 0) {
+            throw new IllegalArgumentException("Purchase price cannot be inferior to 0.");
         }
 
-        if (!Double.isFinite(currentPrice)) {
+        if (!Double.isFinite(currentPrice) || purchasePrice < 0) {
             throw new IllegalArgumentException("Current price cannot be negative.");
         }
 
