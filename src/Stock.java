@@ -1,7 +1,7 @@
 package src;
 
 public class Stock {
-    private String ticker;
+    private final String ticker;
     private double purchasePrice;
     private double currentPrice;
     private int quantity;
@@ -52,11 +52,6 @@ public class Stock {
     }
 
     // Generic Setters
-    public void setTicker(String newTicker) {
-        validateTicker(newTicker);
-        this.ticker = newTicker;
-    }
-
     public void setCurrentPrice(double newCurrentPrice) {
         if (!Double.isFinite(newCurrentPrice)) {
             throw new IllegalArgumentException("New price cannot be inferior to 0.");
