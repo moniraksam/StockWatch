@@ -17,7 +17,6 @@ public class Portfolio {
         if (stock == null) {
             throw new IllegalArgumentException("Cannot add a null stock.");
         }
-
         for (Stock s : this.stocks) {
             if (stock.getTicker().equals(s.getTicker())) {
                 throw new IllegalArgumentException(stock.getTicker() + " already exists in the portfolio.");
@@ -28,8 +27,10 @@ public class Portfolio {
 
     public void updateStockPrice(String ticker, double newPrice) {
         validateTicker(ticker);
-        if (newPrice < 0)
+
+        if (!Double.isFinite(newPrice))
             throw new IllegalArgumentException("New price cannot be negative.");
+
         for (Stock s : stocks) {
             if (s.getTicker().equals(ticker)) {
                 s.setCurrentPrice(newPrice);
@@ -37,14 +38,12 @@ public class Portfolio {
             }
 
         }
-
         // If execution reaches here, no matching ticker was found.
         throw new NoSuchElementException("No matching ticker found in the portfolio");
 
     }
 
     // Get-type methods
-
     public double getTotalAmountInvested() {
         if (isPortfolioEmpty())
             return 0.0;
@@ -61,6 +60,7 @@ public class Portfolio {
     public double getCurrentMarketValue() {
         if (isPortfolioEmpty())
             return 0.0;
+
         double total = 0.0;
 
         for (Stock stock : stocks) {
@@ -99,8 +99,11 @@ public class Portfolio {
     }
 
     // Display methods
-
     public void displayPortfolio() {
+        if (isPortfolioEmpty()){
+            System.out.println("Portforlio is empty.");
+        }
+
         for (Stock stock : stocks) {
             System.out.println(stock);
         }

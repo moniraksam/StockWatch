@@ -9,18 +9,14 @@ public class Stock {
     // Constructor
     public Stock(String ticker, double purchasePrice, double currentPrice,
             int quantity) {
-        if (ticker == null || ticker.isEmpty() || ticker.isBlank()) {
-            throw new IllegalArgumentException("Ticker cannot be null, empty or blank.");
-        } else if (ticker.length() != 4) {
-            throw new IllegalArgumentException("Ticker must be of length 4.");
+        validateTicker(ticker);
+
+        if (!Double.isFinite(purchasePrice)) {
+            throw new IllegalArgumentException("Purchase price must be greater than zero.");
         }
 
-        if (purchasePrice <= 0) {
-            throw new IllegalArgumentException("Purchase price must be greater than zero");
-        }
-
-        if (currentPrice < 0) {
-            throw new IllegalArgumentException("Current price cannot be negative");
+        if (!Double.isFinite(currentPrice)) {
+            throw new IllegalArgumentException("Current price cannot be negative.");
         }
 
         if (quantity <= 0) {
@@ -62,7 +58,7 @@ public class Stock {
     }
 
     public void setCurrentPrice(double newCurrentPrice) {
-        if (newCurrentPrice < 0) {
+        if (!Double.isFinite(newCurrentPrice)) {
             throw new IllegalArgumentException("New price cannot be inferior to 0.");
         }
         this.currentPrice = newCurrentPrice;
