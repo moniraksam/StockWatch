@@ -12,10 +12,10 @@ public class Stock {
         validateTicker(ticker);
 
         if (!Double.isFinite(purchasePrice) || purchasePrice <= 0) {
-            throw new IllegalArgumentException("Purchase price cannot be inferior to 0.");
+            throw new IllegalArgumentException("Purchase price price must be superior to zero.");
         }
 
-        if (!Double.isFinite(currentPrice) || purchasePrice < 0) {
+        if (!Double.isFinite(currentPrice) || currentPrice < 0) {
             throw new IllegalArgumentException("Current price cannot be negative.");
         }
 
@@ -53,7 +53,7 @@ public class Stock {
 
     // Generic Setters
     public void setCurrentPrice(double newCurrentPrice) {
-        if (!Double.isFinite(newCurrentPrice)) {
+        if (!Double.isFinite(newCurrentPrice) || currentPrice < 0) {
             throw new IllegalArgumentException("New price cannot be inferior to 0.");
         }
         this.currentPrice = newCurrentPrice;
