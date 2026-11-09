@@ -25,3 +25,6 @@ replay_pid*
 
 # Main class
 Main.java
+
+# Target files
+/target/

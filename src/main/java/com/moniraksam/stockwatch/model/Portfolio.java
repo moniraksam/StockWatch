@@ -1,4 +1,4 @@
-package src;
+package com.moniraksam.stockwatch.model;
 
 import java.util.List;
 import java.util.NoSuchElementException;

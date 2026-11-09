@@ -1,4 +1,4 @@
-package src;
+package com.moniraksam.stockwatch.model;
 
 public class Stock {
     private final String ticker;
