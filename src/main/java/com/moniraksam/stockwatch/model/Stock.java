@@ -2,7 +2,7 @@ package com.moniraksam.stockwatch.model;
 
 public class Stock {
     private final String ticker;
-    private double purchasePrice;
+    final private double purchasePrice;
     private double currentPrice;
     private int quantity;
 
@@ -12,7 +12,7 @@ public class Stock {
         validateTicker(ticker);
 
         if (!Double.isFinite(purchasePrice) || purchasePrice <= 0) {
-            throw new IllegalArgumentException("Purchase price price must be superior to zero.");
+            throw new IllegalArgumentException("Purchase price must be higher than zero.");
         }
 
         if (!Double.isFinite(currentPrice) || currentPrice < 0) {
@@ -53,21 +53,21 @@ public class Stock {
 
     // Generic Setters
     public void setCurrentPrice(double newCurrentPrice) {
-        if (!Double.isFinite(newCurrentPrice) || currentPrice < 0) {
-            throw new IllegalArgumentException("New price cannot be inferior to 0.");
+        if (!Double.isFinite(newCurrentPrice) || newCurrentPrice < 0) {
+            throw new IllegalArgumentException("Current price cannot be negative.");
         }
         this.currentPrice = newCurrentPrice;
     }
 
     public void setQuantity(int newQuantity) {
         if (newQuantity <= 0) {
-            throw new IllegalArgumentException("New quantity cannot be inferior to 0.");
+            throw new IllegalArgumentException("New quantity cannot be inferior or equals to 0.");
         }
         this.quantity = newQuantity;
     }
 
     // Helper methods
-    public void validateTicker(String ticker) {
+    private void validateTicker(String ticker) {
         if (ticker == null || ticker.isEmpty() || ticker.isBlank()) {
             throw new IllegalArgumentException("Ticker cannot be null, empty or blank.");
         } else if (ticker.length() != 4) {
