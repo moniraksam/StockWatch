@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class StockTest {
 
@@ -28,52 +29,20 @@ class StockTest {
         assertEquals("Ticker cannot be null, empty or blank.", exception.getMessage());
     }
 
-    @Test
-    void constructorShouldRejectPurchaseNaNPrice() {
+    @ParameterizedTest
+    @ValueSource(doubles = { Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, 0.0, -1.0
+    })
+    void constructorShouldRejectInvalidPurchasePrice(double price) {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> new Stock("TEST", Double.NaN, 200.0, 3));
+                () -> new Stock("TEST", price, 200.0, 3));
         assertEquals("Purchase price must be higher than zero.", exception.getMessage());
     }
 
-    @Test
-    void constructorShouldRejectZeroPurchasePrice() {
+    @ParameterizedTest
+    @ValueSource(doubles = { Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, -1.0 })
+    void constructorShouldRejectInvalidCurrentPrice(double price) {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> new Stock("TEST", 0, 200.0, 3));
-        assertEquals("Purchase price must be higher than zero.", exception.getMessage());
-    }
-
-    @Test
-    void constructorShouldRejectNegativePurchasePrice() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> new Stock("TEST", -1, 200.0, 3));
-        assertEquals("Purchase price must be higher than zero.", exception.getMessage());
-    }
-
-    @Test
-    void constructorShouldRejectPositiveInfinityPurchasePrice() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> new Stock("TEST", Double.POSITIVE_INFINITY, 200.0, 3));
-        assertEquals("Purchase price must be higher than zero.", exception.getMessage());
-    }
-
-    @Test
-    void constructorShouldRejectNegativeInfinityPurchasePrice() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> new Stock("TEST", Double.NEGATIVE_INFINITY, 200.0, 3));
-        assertEquals("Purchase price must be higher than zero.", exception.getMessage());
-    }
-
-    @Test
-    void constructorShouldRejectCurrentNaNPrice() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> new Stock("TEST", 100.0, Double.NaN, 3));
-        assertEquals("Current price cannot be negative.", exception.getMessage());
-    }
-
-    @Test
-    void constructorShouldRejectNegativeCurrentPrice() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> new Stock("TEST", 100.0, -1, 3));
+                () -> new Stock("TEST", 100.0, price, 3));
         assertEquals("Current price cannot be negative.", exception.getMessage());
     }
 
@@ -83,34 +52,12 @@ class StockTest {
         assertEquals(0, stock.getCurrentPrice());
     }
 
-    @Test
-    void constructorShouldRejectPositiveInfinityCurrentPrice() {
+    @ParameterizedTest
+    @ValueSource(ints = { 0, -1 })
+    void constructorShouldRejectInvalidQuantity(int quantity) {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> new Stock("TEST", 100.0, Double.POSITIVE_INFINITY, 3));
-        assertEquals("Current price cannot be negative.", exception.getMessage());
-    }
-
-    @Test
-    void constructorShouldRejectNegativeInfinityCurrentPrice() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> new Stock("TEST", 100.0, Double.NEGATIVE_INFINITY, 3));
-        assertEquals("Current price cannot be negative.", exception.getMessage());
-    }
-
-    @Test
-    void constructorShouldRejectZeroQuantity() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> new Stock("TEST", 100.0, 200.0, 0));
+                () -> new Stock("TEST", 100.0, 200.0, quantity));
         assertEquals("Quantity must be greater than zero.", exception.getMessage());
-
-    }
-
-    @Test
-    void constructorShouldRejectNegativeQuantity() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> new Stock("TEST", 100.0, 200.0, -1));
-        assertEquals("Quantity must be greater than zero.", exception.getMessage());
-
     }
 
     // Method Tests
@@ -121,15 +68,49 @@ class StockTest {
         stock = new Stock("TEST", 100.0, 200.0, 3);
     }
 
-    @Test
-    void testCalculateProfitLossPositive() {
-        assertEquals(300, stock.getProfitLoss());
+    @ParameterizedTest
+    @CsvSource({
+            "200.0, 300.0",
+            "20.0, -240.0",
+            "100.0, 0.0",
+            "0.0, -300.0"
+    })
+    void shouldCalculateProfitLoss(double currentPrice, double expectedProfitLoss) {
+        stock.setCurrentPrice(currentPrice);
+        assertEquals(expectedProfitLoss, stock.getProfitLoss());
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = { Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
+            -1.0 })
+    void setCurrentPriceShouldRejectInvalidPrice(double price) {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> stock.setCurrentPrice(price));
+        assertEquals("Current price cannot be negative.", exception.getMessage());
     }
 
     @Test
-    void testCalcualteProfitLossNegative() {
-        stock.setCurrentPrice(20);
-        assertEquals(-240, stock.getProfitLoss());
+    void setCurrentPriceShouldAcceptZero() {
+        stock.setCurrentPrice(0.0);
+        assertEquals(0.0, stock.getCurrentPrice());
     }
+
+    @ParameterizedTest
+    @ValueSource(ints = { -1, 0 })
+    void setQuantityShouldRejectInvalidAmounts(int quantity) {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> stock.setQuantity(quantity));
+        assertEquals("Quantity must be greater than zero.", exception.getMessage());
+    }
+
+    @ParameterizedTest 
+    @CsvSource({
+            "1", "1000", "9999"
+    })
+    void setQuantityShouldAcceptPositives(int quantity) {
+        stock.setQuantity(quantity);
+        assertEquals(quantity, stock.getQuantity());
+    }
+
 
 }
