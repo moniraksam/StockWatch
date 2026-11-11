@@ -1,5 +1,5 @@
 package com.moniraksam.stockwatch.model;
 
-class PortforlioTest{
+class PortfolioTest{
     
 }

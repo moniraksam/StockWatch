@@ -2,7 +2,7 @@ package com.moniraksam.stockwatch.model;
 
 public class Stock {
     private final String ticker;
-    final private double purchasePrice;
+    private final double purchasePrice;
     private double currentPrice;
     private int quantity;
 
@@ -10,31 +10,20 @@ public class Stock {
     public Stock(String ticker, double purchasePrice, double currentPrice,
             int quantity) {
         validateTicker(ticker);
-
-        if (!Double.isFinite(purchasePrice) || purchasePrice <= 0) {
-            throw new IllegalArgumentException("Purchase price must be higher than zero.");
-        }
-
-        if (!Double.isFinite(currentPrice) || currentPrice < 0) {
-            throw new IllegalArgumentException("Current price cannot be negative.");
-        }
-
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than zero.");
-        }
-
+        validatePurchasePrice(purchasePrice);
+        validateCurrentPrice(currentPrice);
+        validateQuantity(quantity);
         this.ticker = ticker;
         this.purchasePrice = purchasePrice;
         this.currentPrice = currentPrice;
         this.quantity = quantity;
     }
 
-    // Methods
     public double getProfitLoss() {
         return (currentPrice - purchasePrice) * quantity;
     }
 
-    // Generic getters
+    // Getters
     public String getTicker() {
         return this.ticker;
     }
@@ -51,24 +40,20 @@ public class Stock {
         return this.quantity;
     }
 
-    // Generic Setters
+    // Setters
     public void setCurrentPrice(double newCurrentPrice) {
-        if (!Double.isFinite(newCurrentPrice) || newCurrentPrice < 0) {
-            throw new IllegalArgumentException("Current price cannot be negative.");
-        }
+        validateCurrentPrice(newCurrentPrice);
         this.currentPrice = newCurrentPrice;
     }
 
     public void setQuantity(int newQuantity) {
-        if (newQuantity <= 0) {
-            throw new IllegalArgumentException("New quantity cannot be inferior or equals to 0.");
-        }
+        validateQuantity(newQuantity);
         this.quantity = newQuantity;
     }
 
     // Helper methods
-    private void validateTicker(String ticker) {
-        if (ticker == null || ticker.isEmpty() || ticker.isBlank()) {
+    private static void validateTicker(String ticker) {
+        if (ticker == null || ticker.isBlank()) {
             throw new IllegalArgumentException("Ticker cannot be null, empty or blank.");
         } else if (ticker.length() != 4) {
             throw new IllegalArgumentException("Ticker must be of length 4.");
@@ -76,12 +61,39 @@ public class Stock {
         // If all good then no exceptions thrown.
     }
 
+    private static void validatePurchasePrice(double price) {
+        if (!Double.isFinite(price) || price <= 0) {
+            throw new IllegalArgumentException("Purchase price must be higher than zero.");
+        }
+    }
+
+    private static void validateCurrentPrice(double price) {
+        if (!Double.isFinite(price) || price < 0) {
+            throw new IllegalArgumentException("Current price cannot be negative.");
+        }
+    }
+
+    private static void validateQuantity(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than zero.");
+        }
+    }
+
     // Overrides
     @Override
     public String toString() {
-        return "****\n" + this.ticker.toUpperCase() + "\n****\nPurchase Price : " + this.purchasePrice
-                + "\nCurrent Price : " + this.currentPrice + "\nQuantity : " + this.quantity + "\nProfit Loss : "
-                + getProfitLoss() + "\n";
+        return String.format(
+                java.util.Locale.ROOT,
+                "Stock: %s%n" +
+                        "Purchase price: %.2f%n" +
+                        "Current price: %.2f%n" +
+                        "Quantity: %d%n" +
+                        "Profit/Loss: %+.2f",
+                ticker.toUpperCase(),
+                purchasePrice,
+                currentPrice,
+                quantity,
+                getProfitLoss());
     }
 
 }

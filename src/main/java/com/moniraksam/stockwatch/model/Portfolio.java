@@ -124,8 +124,8 @@ public class Portfolio {
     }
 
     // Helper methods
-    public void validateTicker(String ticker) {
-        if (ticker == null || ticker.isEmpty() || ticker.isBlank()) {
+    private static void validateTicker(String ticker) {
+        if (ticker == null || ticker.isBlank()) {
             throw new IllegalArgumentException("Ticker cannot be null, empty or blank.");
         } else if (ticker.length() != 4) {
             throw new IllegalArgumentException("Ticker must be of length 4.");
