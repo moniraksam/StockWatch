@@ -1,15 +1,16 @@
 package com.moniraksam.stockwatch.model;
 
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Locale;
 
 public class Portfolio {
-    private final List<Stock> stocks;
+    private final Map<String, Stock> stocks;
 
     // Constructor
     public Portfolio() {
-        stocks = new ArrayList<>();
+        stocks = new HashMap<>();
     }
 
     // Methods
@@ -17,40 +18,39 @@ public class Portfolio {
         if (stock == null) {
             throw new IllegalArgumentException("Cannot add a null stock.");
         }
-        for (Stock s : this.stocks) {
-            if (stock.getTicker().equals(s.getTicker())) {
-                throw new IllegalArgumentException(stock.getTicker() + " already exists in the portfolio.");
-            }
+
+        String ticker = stock.getTicker();
+
+        if (stocks.containsKey(ticker)) {
+            throw new IllegalArgumentException(
+                    ticker + " already exists in the portfolio.");
         }
-        stocks.add(stock);
+
+        stocks.put(ticker, stock);
     }
 
     public void updateStockPrice(String ticker, double newPrice) {
         validateTicker(ticker);
 
-        if (!Double.isFinite(newPrice) || newPrice < 0)
+        if (!Double.isFinite(newPrice) || newPrice < 0) {
             throw new IllegalArgumentException("New price cannot be negative.");
-
-        for (Stock s : stocks) {
-            if (s.getTicker().equals(ticker)) {
-                s.setCurrentPrice(newPrice);
-                return;
-            }
-
         }
-        // If execution reaches here, no matching ticker was found.
-        throw new NoSuchElementException("No matching ticker found in the portfolio");
 
+        Stock stock = stocks.get(ticker.toUpperCase(Locale.ROOT));
+
+        if (stock == null) {
+            throw new NoSuchElementException(
+                    "No matching ticker found in the portfolio");
+        }
+
+        stock.setCurrentPrice(newPrice);
     }
 
     // Get-type methods
     public double getTotalAmountInvested() {
-        if (isPortfolioEmpty())
-            return 0.0;
-
         double total = 0.0;
 
-        for (Stock stock : stocks) {
+        for (Stock stock : stocks.values()) {
             total += stock.getPurchasePrice() * stock.getQuantity();
         }
 
@@ -58,12 +58,9 @@ public class Portfolio {
     }
 
     public double getCurrentMarketValue() {
-        if (isPortfolioEmpty())
-            return 0.0;
-
         double total = 0.0;
 
-        for (Stock stock : stocks) {
+        for (Stock stock : stocks.values()) {
             total += stock.getCurrentPrice() * stock.getQuantity();
         }
 
@@ -71,41 +68,41 @@ public class Portfolio {
     }
 
     public double getProfitLoss() {
-        if (isPortfolioEmpty())
-            return 0.0;
         return getCurrentMarketValue() - getTotalAmountInvested();
     }
 
     public Stock getMostProfitableStockPosition() {
-        double mostProfitableValue = Double.NEGATIVE_INFINITY;
-        int index = 0;
+        Stock mostProfitable = null;
 
-        for (int i = 0; i < stocks.size(); i++) {
-            if (stocks.get(i).getProfitLoss() > mostProfitableValue) {
-                mostProfitableValue = stocks.get(i).getProfitLoss();
-                index = i;
+        for (Stock stock : stocks.values()) {
+            if (mostProfitable == null ||
+                    stock.getProfitLoss() > mostProfitable.getProfitLoss()) {
+                mostProfitable = stock;
             }
         }
 
-        return stocks.isEmpty() ? null : stocks.get(index);
+        return mostProfitable;
     }
 
     public double getPortfolioPercentReturn() {
-        if (getTotalAmountInvested() == 0) {
-            throw new IllegalStateException("Cannot calculate return on an empty investment.");
+        double invested = getTotalAmountInvested();
+
+        if (invested == 0.0) {
+            throw new IllegalStateException(
+                    "Cannot calculate return on an empty investment.");
         }
 
-        return getProfitLoss() / getTotalAmountInvested() * 100;
+        return getProfitLoss() / invested * 100;
     }
 
-    // Display methods
+    // Will need to remove when starting spring boot application
     public void displayPortfolio() {
-        if (isPortfolioEmpty()){
-            System.out.println("Portforlio is empty.");
+        if (isPortfolioEmpty()) {
+            System.out.println("Portfolio is empty.");
             return;
         }
 
-        for (Stock stock : stocks) {
+        for (Stock stock : stocks.values()) {
             System.out.println(stock);
         }
 
@@ -135,19 +132,11 @@ public class Portfolio {
 
     public boolean containsTicker(String tickerToSearch) {
         validateTicker(tickerToSearch);
-        for (Stock s : stocks) {
-            if (s.getTicker().equals(tickerToSearch)) {
-                return true;
-            }
-        }
-        return false;
+        return stocks.containsKey(tickerToSearch.toUpperCase(Locale.ROOT));
     }
 
     public boolean isPortfolioEmpty() {
-        if (this.stocks.isEmpty()) {
-            return true;
-        } else {
-            return false;
-        }
+        return stocks.isEmpty();
     }
+
 }
