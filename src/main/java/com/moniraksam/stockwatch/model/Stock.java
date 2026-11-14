@@ -1,5 +1,7 @@
 package com.moniraksam.stockwatch.model;
 
+import java.util.Locale;
+
 public class Stock {
     private final String ticker;
     private final double purchasePrice;
@@ -13,7 +15,7 @@ public class Stock {
         validatePurchasePrice(purchasePrice);
         validateCurrentPrice(currentPrice);
         validateQuantity(quantity);
-        this.ticker = ticker;
+        this.ticker = ticker.toUpperCase(Locale.ROOT);
         this.purchasePrice = purchasePrice;
         this.currentPrice = currentPrice;
         this.quantity = quantity;
