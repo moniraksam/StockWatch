@@ -30,6 +30,20 @@ class StockTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = { "A", "AB", "ABC" })
+    void constructorShouldRejectTickerShorterThanFourCharacters(String ticker) {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock(ticker, 100.0, 200.0, 3));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "ABCDE", "ABCDEFG" })
+    void constructorShouldRejectTickerLongerThanFourCharacters(String ticker) {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock(ticker, 100.0, 200.0, 3));
+    }
+
+    @ParameterizedTest
     @ValueSource(doubles = { Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, 0.0, -1.0
     })
     void constructorShouldRejectInvalidPurchasePrice(double price) {
@@ -103,7 +117,7 @@ class StockTest {
         assertEquals("Quantity must be greater than zero.", exception.getMessage());
     }
 
-    @ParameterizedTest 
+    @ParameterizedTest
     @CsvSource({
             "1", "1000", "9999"
     })
@@ -112,5 +126,23 @@ class StockTest {
         assertEquals(quantity, stock.getQuantity());
     }
 
+    @ParameterizedTest
+    @CsvSource({
+            "200.0, 200.00, +300.00",
+            "20.0, 20.00, -240.00",
+            "100.0, 100.00, +0.00"
+    })
+    void toStringShouldFormatStockDetails(double currentPrice, String expectedCurrentPrice,
+            String expectedProfitLoss) {
+        Stock stock = new Stock("test", 100.0, currentPrice, 3);
+        String expected = String.join(System.lineSeparator(),
+                "Stock: TEST",
+                "Purchase price: 100.00",
+                "Current price: " + expectedCurrentPrice,
+                "Quantity: 3",
+                "Profit/Loss: " + expectedProfitLoss);
+
+        assertEquals(expected, stock.toString());
+    }
 
 }
