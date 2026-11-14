@@ -2,7 +2,7 @@ package com.moniraksam.stockwatch.model;
 
 import java.util.NoSuchElementException;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 
 public class Portfolio {
@@ -10,7 +10,7 @@ public class Portfolio {
 
     // Constructor
     public Portfolio() {
-        stocks = new HashMap<>();
+        stocks = new LinkedHashMap<>();
     }
 
     // Methods
@@ -95,6 +95,25 @@ public class Portfolio {
         return getProfitLoss() / invested * 100;
     }
 
+    // Helper methods
+    private static void validateTicker(String ticker) {
+        if (ticker == null || ticker.isBlank()) {
+            throw new IllegalArgumentException("Ticker cannot be null, empty or blank.");
+        } else if (ticker.length() != 4) {
+            throw new IllegalArgumentException("Ticker must be of length 4.");
+        }
+        // If all good then no exceptions thrown.
+    }
+
+    public boolean containsTicker(String tickerToSearch) {
+        validateTicker(tickerToSearch);
+        return stocks.containsKey(tickerToSearch.toUpperCase(Locale.ROOT));
+    }
+
+    public boolean isPortfolioEmpty() {
+        return stocks.isEmpty();
+    }
+
     // Will need to remove when starting spring boot application
     public void displayPortfolio() {
         if (isPortfolioEmpty()) {
@@ -118,25 +137,6 @@ public class Portfolio {
         System.out.println("Porforlio Return in % : "
                 + getPortfolioPercentReturn());
         System.out.println();
-    }
-
-    // Helper methods
-    private static void validateTicker(String ticker) {
-        if (ticker == null || ticker.isBlank()) {
-            throw new IllegalArgumentException("Ticker cannot be null, empty or blank.");
-        } else if (ticker.length() != 4) {
-            throw new IllegalArgumentException("Ticker must be of length 4.");
-        }
-        // If all good then no exceptions thrown.
-    }
-
-    public boolean containsTicker(String tickerToSearch) {
-        validateTicker(tickerToSearch);
-        return stocks.containsKey(tickerToSearch.toUpperCase(Locale.ROOT));
-    }
-
-    public boolean isPortfolioEmpty() {
-        return stocks.isEmpty();
     }
 
 }
