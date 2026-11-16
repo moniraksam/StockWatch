@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 
+// Manages positions and calculates portfolio-wide performance
 public class Portfolio {
     private final Map<String, Stock> stocks;
 

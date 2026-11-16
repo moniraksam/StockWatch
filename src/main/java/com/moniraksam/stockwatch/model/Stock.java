@@ -2,6 +2,7 @@ package com.moniraksam.stockwatch.model;
 
 import java.util.Locale;
 
+// Identifies a financial asset and holds its current market price
 public class Stock {
     private final String ticker;
     private final double purchasePrice;
