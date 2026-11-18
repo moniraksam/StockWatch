@@ -64,11 +64,11 @@ public class Transaction {
     // Validators
     private static void validateLocalDateTime(LocalDateTime dateTime) {
         if (dateTime == null) {
-            throw new IllegalArgumentException("DateTime cannot be null");
+            throw new IllegalArgumentException("DateTime cannot be null.");
         }
 
         if (dateTime.getYear() < 1900 || dateTime.getYear() > 2100) {
-            throw new IllegalArgumentException("Year must be between 1900 and 2100");
+            throw new IllegalArgumentException("Year must be between 1900 and 2100.");
         }
     }
 
@@ -87,10 +87,11 @@ public class Transaction {
 
     private static void validatePricePerShare(BigDecimal pricePerShare) {
         if (pricePerShare == null || pricePerShare.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("pricePerShare cannot be negative or zero.");
+            throw new IllegalArgumentException("Price per share cannot be negative or zero.");
         }
     }
 
+    //Need to beef up this test with more test cases parameterized
     private static void validateQuantity(int quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than zero.");
