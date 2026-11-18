@@ -28,3 +28,4 @@ Main.java
 
 # Target files
 /target/
+.vscode/
