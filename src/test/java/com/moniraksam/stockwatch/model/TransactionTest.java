@@ -4,22 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.EnumSources;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import com.moniraksam.stockwatch.model.Transaction.TransactionType;
-
-public class TransactionTest {
+class TransactionTest {
     private Transaction transaction;
     LocalDateTime date = LocalDateTime.of(2026, 11, 18, 14, 30); // To test dates
 
@@ -37,7 +33,7 @@ public class TransactionTest {
         assertEquals(date, transaction.getDateTime());
         assertEquals(type, transaction.getTransactionType());
         assertEquals("TEST", transaction.getTicker());
-        assertEquals(BigDecimal.valueOf(100.0), transaction.getPricePerShare());
+        assertEquals(new BigDecimal("100.0"), transaction.getPricePerShare());
         assertEquals(3, transaction.getQuantity());
     }
 
@@ -95,7 +91,7 @@ public class TransactionTest {
     @ValueSource(strings = { "0.0", "-1.0", "-100.0" })
     void constructorShouldRejectZeroOrNegativePricePerShare(String price) {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> new Transaction(date, Transaction.TransactionType.SELL, "TEST", new BigDecimal(price), 0));
+                () -> new Transaction(date, Transaction.TransactionType.SELL, "TEST", new BigDecimal(price), 3));
         assertEquals("Price per share cannot be negative or zero.", exception.getMessage());
     }
 
@@ -108,9 +104,32 @@ public class TransactionTest {
         assertEquals("Quantity must be greater than zero.", exception.getMessage());
     }
 
-    @Test
-    void shouldgetTransactionTotal() {
-        assertEquals(new BigDecimal("300.0"), transaction.getTransactionTotal());
+    @ParameterizedTest
+    @CsvSource({
+            "BUY, 100.00, 3, 300.00",
+            "SELL, 150.00, 2, 300.00",
+            "BUY, 0.01, 1, 0.01",
+            "SELL, 25.50, 4, 102.00",
+            "BUY, 99.99, 10, 999.90",
+            "SELL, 123.456, 3, 370.368"
+    })
+    void shouldCalculateTransactionTotal(
+            Transaction.TransactionType type,
+            String price,
+            int quantity,
+            String expectedTotal) {
+
+        Transaction transaction = new Transaction(
+                date,
+                type,
+                "TEST",
+                new BigDecimal(price),
+                quantity);
+
+        BigDecimal actualTotal = transaction.getTransactionTotal();
+
+        assertEquals(0,
+                new BigDecimal(expectedTotal).compareTo(actualTotal));
     }
 
 }
