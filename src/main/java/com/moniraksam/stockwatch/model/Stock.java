@@ -7,14 +7,17 @@ import java.util.Locale;
 public class Stock {
     private final String ticker;
     private BigDecimal currentPrice;
+    private final String companyName;
 
     // Constructor
-    public Stock(String ticker, BigDecimal currentPrice) {
+    public Stock(String ticker, BigDecimal currentPrice, String companyName) {
         validateTicker(ticker);
         validateCurrentPrice(currentPrice);
-        
+        validateCompanyName(companyName);
+
         this.ticker = ticker.toUpperCase(Locale.ROOT);
         this.currentPrice = currentPrice;
+        this.companyName = companyName;
     }
 
     public String getTicker() {
@@ -25,6 +28,10 @@ public class Stock {
         return this.currentPrice;
     }
 
+    public String getCompanyName() {
+        return this.companyName;
+    }
+
     public void setCurrentPrice(BigDecimal newPrice) {
         validateCurrentPrice(newPrice);
         this.currentPrice = newPrice;
@@ -32,16 +39,20 @@ public class Stock {
 
     // Helper methods
     private static void validateTicker(String ticker) {
-        if (ticker == null || ticker.isBlank()) {
+        if (ticker == null || ticker.isBlank())
             throw new IllegalArgumentException("Ticker cannot be null, empty or blank.");
-        }
 
     }
 
+    private static void validateCompanyName(String companyName) {
+        if (companyName == null || companyName.isBlank())
+            throw new IllegalArgumentException("Company name cannot be null, empty or blank");
+    }
+
     private static void validateCurrentPrice(BigDecimal price) {
-        if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
+        if (price == null || price.compareTo(BigDecimal.ZERO) < 0)
             throw new IllegalArgumentException("Current price cannot be negative.");
-        }
+
     }
 
     // Overrides
@@ -50,8 +61,10 @@ public class Stock {
         return String.format(
                 Locale.ROOT,
                 "Stock: %s%n" +
+                        "Company name: %s%n" +
                         "Current price: %.2f",
                 ticker,
+                companyName,
                 currentPrice);
     }
 

@@ -1,3 +1,4 @@
+
 package com.moniraksam.stockwatch.model;
 
 import java.math.BigDecimal;
@@ -17,7 +18,7 @@ class StockTest {
 
     @BeforeEach
     void setUp() {
-        stock = new Stock("TEST", new BigDecimal("200.00"));
+        stock = new Stock("TEST", new BigDecimal("200.00"), "TESTCOMPANY");
     }
 
     // Constructor tests
@@ -25,6 +26,7 @@ class StockTest {
     @Test
     void shouldConstructCorrectly() {
         assertEquals("TEST", stock.getTicker());
+        assertEquals("TESTCOMPANY", stock.getCompanyName());
         assertEquals(0, new BigDecimal("200.00").compareTo(stock.getCurrentPrice()));
     }
 
@@ -32,8 +34,9 @@ class StockTest {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "   ", "\t" })
     void constructorShouldRejectInvalidTicker(String ticker) {
-        IllegalArgumentException exception = assertThrows( 
-            IllegalArgumentException.class, () -> new Stock(ticker, new BigDecimal("200.00")));
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new Stock(ticker, new BigDecimal("200.00"), "TESTCOMPANY"));
 
         assertEquals("Ticker cannot be null, empty or blank.", exception.getMessage());
     }
@@ -41,16 +44,36 @@ class StockTest {
     @ParameterizedTest
     @ValueSource(strings = { "aapl", "AaPl", "AAPL" })
     void constructorShouldNormalizeTicker(String ticker) {
-        Stock stock = new Stock(ticker, new BigDecimal("100.00"));
+        Stock stock = new Stock(ticker, new BigDecimal("100.00"), "Apple Inc.");
 
         assertEquals("AAPL", stock.getTicker());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = { " ", "   ", "\t" })
+    void constructorShouldRejectInvalidCompanyName(String companyName) {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new Stock("TEST", new BigDecimal("200.00"), companyName));
+
+        assertEquals("Company name cannot be null, empty or blank",
+                exception.getMessage());
+    }
+
+    @Test
+    void constructorShouldPreserveCompanyName() {
+        Stock stock = new Stock("AAPL", new BigDecimal("200.00"), "Apple Inc.");
+
+        assertEquals("Apple Inc.", stock.getCompanyName());
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "-1", "-0.01", "-100.50" })
     void constructorShouldRejectNegativeCurrentPrice(String price) {
         IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class, () -> new Stock("TEST", new BigDecimal(price)));
+                IllegalArgumentException.class,
+                () -> new Stock("TEST", new BigDecimal(price), "TESTCOMPANY"));
 
         assertEquals("Current price cannot be negative.", exception.getMessage());
     }
@@ -58,13 +81,13 @@ class StockTest {
     @Test
     void constructorShouldRejectNullCurrentPrice() {
         assertThrows(IllegalArgumentException.class,
-                () -> new Stock("TEST", null));
+                () -> new Stock("TEST", null, "TESTCOMPANY"));
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "0", "0.00", "0.01", "100.50", "999999.99" })
     void constructorShouldAcceptNonNegativeCurrentPrice(String price) {
-        Stock stock = new Stock("TEST", new BigDecimal(price));
+        Stock stock = new Stock("TEST", new BigDecimal(price), "TESTCOMPANY");
 
         assertEquals(0, new BigDecimal(price).compareTo(stock.getCurrentPrice()));
     }
@@ -82,12 +105,14 @@ class StockTest {
     @ParameterizedTest
     @ValueSource(strings = { "-1", "-0.01", "-100.50" })
     void setCurrentPriceShouldRejectNegativePrice(String price) {
-        assertThrows(IllegalArgumentException.class, () -> stock.setCurrentPrice(new BigDecimal(price)));
+        assertThrows(IllegalArgumentException.class,
+                () -> stock.setCurrentPrice(new BigDecimal(price)));
     }
 
     @Test
     void setCurrentPriceShouldRejectNull() {
-        assertThrows(IllegalArgumentException.class, () -> stock.setCurrentPrice(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> stock.setCurrentPrice(null));
     }
 
     @Test
@@ -97,8 +122,17 @@ class StockTest {
         assertThrows(IllegalArgumentException.class,
                 () -> stock.setCurrentPrice(new BigDecimal("-10.00")));
 
-        assertEquals(0,
-                originalPrice.compareTo(stock.getCurrentPrice()));
+        assertEquals(0, originalPrice.compareTo(stock.getCurrentPrice()));
+    }
+
+    @Test
+    void nullPriceShouldNotChangeExistingPrice() {
+        BigDecimal originalPrice = stock.getCurrentPrice();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> stock.setCurrentPrice(null));
+
+        assertEquals(0, originalPrice.compareTo(stock.getCurrentPrice()));
     }
 
     // toString tests
@@ -113,10 +147,11 @@ class StockTest {
     void toStringShouldFormatStockDetails(
             String currentPrice, String expectedPrice) {
 
-        Stock stock = new Stock("aapl", new BigDecimal(currentPrice));
+        Stock stock = new Stock("aapl", new BigDecimal(currentPrice), "Apple Inc.");
 
         String expected = String.join(System.lineSeparator(),
                 "Stock: AAPL",
+                "Company name: Apple Inc.",
                 "Current price: " + expectedPrice);
 
         assertEquals(expected, stock.toString());
