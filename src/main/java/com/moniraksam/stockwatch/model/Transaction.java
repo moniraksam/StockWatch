@@ -91,7 +91,6 @@ public class Transaction {
         }
     }
 
-    //Need to beef up this test with more test cases parameterized
     private static void validateQuantity(int quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than zero.");
