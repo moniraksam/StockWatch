@@ -1,4 +1,3 @@
-
 package com.moniraksam.stockwatch.model;
 
 import java.math.BigDecimal;

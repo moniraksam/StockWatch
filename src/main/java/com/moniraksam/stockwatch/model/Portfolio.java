@@ -2,142 +2,160 @@ package com.moniraksam.stockwatch.model;
 
 import java.util.NoSuchElementException;
 import java.util.Map;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 
-// Manages positions and calculates portfolio-wide performance
+// Holds positions and calculates portfolio-wide performance
 public class Portfolio {
-    private final Map<String, Stock> stocks;
+    private final Map<String, Position> positions;
 
     // Constructor
     public Portfolio() {
-        stocks = new LinkedHashMap<>();
+        positions = new LinkedHashMap<>();
     }
 
     // Methods
-    public void addStock(Stock stock) {
-        if (stock == null) {
-            throw new IllegalArgumentException("Cannot add a null stock.");
-        }
+    public void buyStock(Stock stock, int quantity, BigDecimal pricePerShare) {
+        validateStock(stock);
+        validateQuantity(quantity);
+        validateAveragePurchasePrice(pricePerShare);
 
         String ticker = stock.getTicker();
 
-        if (stocks.containsKey(ticker)) {
-            throw new IllegalArgumentException(
-                    ticker + " already exists in the portfolio.");
+        if (positions.containsKey(ticker)) {
+            positions.get(ticker).buy(quantity, pricePerShare);
+        } else {
+            positions.put(ticker, new Position(stock, quantity, pricePerShare));
         }
 
-        stocks.put(ticker, stock);
     }
 
-    public void updateStockPrice(String ticker, double newPrice) {
+    public void sellStock(String ticker, int quantity) {
         validateTicker(ticker);
+        ticker = ticker.toUpperCase(Locale.ROOT);
+        validateQuantity(quantity);
 
-        if (!Double.isFinite(newPrice) || newPrice < 0) {
-            throw new IllegalArgumentException("New price cannot be negative.");
+        if (positions.containsKey(ticker)) {
+            positions.get(ticker).sell(quantity);
+        } else {
+            throw new NoSuchElementException("Cannot sell a stock not in the portfolio.");
         }
 
-        Stock stock = stocks.get(ticker.toUpperCase(Locale.ROOT));
+        if (positions.get(ticker).getQuantity() == 0) {
+            positions.remove(ticker);
+        }
 
-        if (stock == null) {
+    }
+
+    public void updateStockPrice(String ticker, BigDecimal newPrice) {
+        validateTicker(ticker);
+        ticker = ticker.toUpperCase(Locale.ROOT);
+        validateNewPrice(newPrice);
+
+        Position position = positions.get(ticker);
+
+        if (position == null) {
             throw new NoSuchElementException(
-                    "No matching ticker found in the portfolio");
+                    "No matching ticker found in the portfolio.");
         }
 
-        stock.setCurrentPrice(newPrice);
+        position.getStock().setCurrentPrice(newPrice);
     }
 
     // Get-type methods
-    public double getTotalAmountInvested() {
-        double total = 0.0;
 
-        for (Stock stock : stocks.values()) {
-            total += stock.getPurchasePrice() * stock.getQuantity();
+    public BigDecimal getCurrentMarketValue() {
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (Position position : positions.values()) {
+            total = total.add(position.getMarketValue());
         }
 
         return total;
     }
 
-    public double getCurrentMarketValue() {
-        double total = 0.0;
+    public BigDecimal getTotalCostBasis() {
+        BigDecimal total = BigDecimal.ZERO;
 
-        for (Stock stock : stocks.values()) {
-            total += stock.getCurrentPrice() * stock.getQuantity();
+        for (Position position : positions.values()) {
+            total = total.add(position.getTotalCostBasis());
         }
 
         return total;
+
     }
 
-    public double getProfitLoss() {
-        return getCurrentMarketValue() - getTotalAmountInvested();
+    public BigDecimal getProfitLoss() {
+        return getCurrentMarketValue().subtract(getTotalCostBasis());
     }
 
-    public Stock getMostProfitableStockPosition() {
-        Stock mostProfitable = null;
+    public Position getMostProfitableStockPosition() {
+        Position mostProfitable = null;
 
-        for (Stock stock : stocks.values()) {
+        for (Position position : positions.values()) {
             if (mostProfitable == null ||
-                    stock.getProfitLoss() > mostProfitable.getProfitLoss()) {
-                mostProfitable = stock;
+                    position.getUnrealizedProfitLoss()
+                            .compareTo(mostProfitable.getUnrealizedProfitLoss()) > 0) {
+                mostProfitable = position;
             }
         }
 
         return mostProfitable;
     }
 
-    public double getPortfolioPercentReturn() {
-        double invested = getTotalAmountInvested();
+    public BigDecimal getPortfolioPercentReturn() {
+        BigDecimal invested = getTotalCostBasis();
 
-        if (invested == 0.0) {
+        if (invested.compareTo(BigDecimal.ZERO) == 0) {
             throw new IllegalStateException(
                     "Cannot calculate return on an empty investment.");
         }
 
-        return getProfitLoss() / invested * 100;
+        BigDecimal div = getProfitLoss().divide(invested, 8, RoundingMode.HALF_UP);
+        return div.multiply(BigDecimal.valueOf(100));
     }
 
     // Helper methods
     private static void validateTicker(String ticker) {
         if (ticker == null || ticker.isBlank()) {
             throw new IllegalArgumentException("Ticker cannot be null, empty or blank.");
-        } else if (ticker.length() != 4) {
-            throw new IllegalArgumentException("Ticker must be of length 4.");
         }
-        // If all good then no exceptions thrown.
+
+    }
+
+    private static void validateStock(Stock stock) {
+        if (stock == null) {
+            throw new IllegalArgumentException("Stock cannot be null.");
+        }
+    }
+
+    private static void validateQuantity(int quantity) {
+        if (quantity <= 0)
+            throw new IllegalArgumentException(
+                    "Quantity must be greater than 0.");
+    }
+
+    private static void validateAveragePurchasePrice(BigDecimal averagePurchasePrice) {
+        if (averagePurchasePrice == null ||
+                averagePurchasePrice.compareTo(BigDecimal.ZERO) <= 0)
+            throw new IllegalArgumentException("Average purchase price cannot be negative or zero.");
+    }
+
+    private static void validateNewPrice(BigDecimal newPrice) {
+        if (newPrice == null ||
+                newPrice.compareTo(BigDecimal.ZERO) < 0)
+            throw new IllegalArgumentException("New price cannot be negative.");
     }
 
     public boolean containsTicker(String tickerToSearch) {
         validateTicker(tickerToSearch);
-        return stocks.containsKey(tickerToSearch.toUpperCase(Locale.ROOT));
+        return positions.containsKey(tickerToSearch.toUpperCase(Locale.ROOT));
     }
 
     public boolean isPortfolioEmpty() {
-        return stocks.isEmpty();
-    }
-
-    // Will need to remove when starting spring boot application
-    public void displayPortfolio() {
-        if (isPortfolioEmpty()) {
-            System.out.println("Portfolio is empty.");
-            return;
-        }
-
-        for (Stock stock : stocks.values()) {
-            System.out.println(stock);
-        }
-
-        System.out.println("Total invested: "
-                + getTotalAmountInvested());
-
-        System.out.println("Current value: "
-                + getCurrentMarketValue());
-
-        System.out.println("Total profit: "
-                + getProfitLoss() + "\n");
-
-        System.out.println("Porforlio Return in % : "
-                + getPortfolioPercentReturn());
-        System.out.println();
+        return positions.isEmpty();
     }
 
 }
