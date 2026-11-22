@@ -50,6 +50,10 @@ public class Position {
     }
 
     // Getters
+    public Stock getStock() {
+        return stock;
+    }
+
     public String getTicker() {
         return stock.getTicker();
     }

@@ -26,6 +26,7 @@ class PositionTest {
 
     @Test
     void shouldConstructPositionCorrectly() {
+        assertEquals(stock, position.getStock());
         assertEquals("AAPL", position.getTicker());
         assertEquals(10, position.getQuantity());
         assertBigDecimalEquals("150.00", position.getAveragePurchasePrice());
