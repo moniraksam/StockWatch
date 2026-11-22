@@ -6,8 +6,8 @@ import java.util.Locale;
 // Represents a financial asset and holds its current market price
 public class Stock {
     private final String ticker;
-    private BigDecimal currentPrice;
     private final String companyName;
+    private BigDecimal currentPrice;
 
     // Constructor
     public Stock(String ticker, BigDecimal currentPrice, String companyName) {
@@ -20,6 +20,7 @@ public class Stock {
         this.companyName = companyName;
     }
 
+    // Getters
     public String getTicker() {
         return this.ticker;
     }
